@@ -2,9 +2,9 @@
 
 > **文档唯一权威记录 | Single Source of Truth**
 >
-> 文档版本: v2.0.1
+> 文档版本: v2.0.2
 > 创建日期: 2026-09-26
-> 最后更新: 2026-10-16
+> 最后更新: 2026-10-17
 > 项目负责人: Tao Zhu
 > 关键词: `graph-pretraining`, `HGT`, `cross-cancer`, `NAMR`, `CSP`, `C3L`, `ESM-2`, `TCGA`, `STRING-PPI`, `Cell Reports Methods`
 
@@ -312,6 +312,26 @@ Stage 7: Assembly & Figures      Stage 8: Benchmark & Audits
 ## 6. 变更记录 | Changelog
 
 > 标记格式: ▲ 新增 ▼ 删除 ■ 修改 ⚠ 注意
+
+### v2.0.2 — 2026-10-17（双语 README 与发布仓库独立化）
+
+| 区域 | 变更 | 操作人 | 说明 |
+|---|---|---|---|
+| `release/README_zh-CN.md` | ▲ 新增 | 项目组 | 与 `README.md` 逐节对齐的中文说明（仓库结构 / 脚本命名 / 运行方式 / 10 命令配方 / 数据可用性 / 图表 / 测试 / 语言规范 / 引用）；首尾均附英文版返回链接 |
+| `release/README.md` | ■ 修改 | 项目组 | 顶部新增双语切换块；目录树补入 `README_zh-CN.md`；§Language 由“唯一 CJK 文件”改为列出 `project.md` 与 `README_zh-CN.md` 两个 |
+| 父仓库 `README.md` | ■ 修改 | 项目组 | 第 17、156 行 `file:///Volumes/...` 本地绝对路径改为相对路径（发布文档禁止本地绝对路径，共 3 处） |
+| 父仓库 `.gitignore` | ■ 修改 | 项目组 | 新增 `release/` 规则：release 已独立为单独 Git 仓库，父仓库不再追踪 |
+| `release/` 仓库 | ▲ 独立化 | 项目组 | 独立 `git init -b main` + 首个 commit `1fa230d`；推送至 https://github.com/tjogzt/graphssl-multicancer-gfm-release （Public，默认分支 `main`） |
+
+**验证证据（v2.0.2）**
+
+| 检查项 | 结果 |
+|---|---|
+| release 远程文件数 | 119（118 + `README_zh-CN.md`） |
+| release 工作区状态 | 干净；`main` 与 `origin/main` 同步 |
+| release 推送前安全扫描 | 无密钥 / 无 token / 无本地绝对路径（唯一命中为文档中“已移除绝对路径”的说明文字） |
+| 父仓库 README 本地绝对路径 | 0（原 3 处） |
+| 父仓库未跟踪项 | 0 |
 
 ### v2.0.1 — 2026-10-16（提交前验证与根目录清理）
 
