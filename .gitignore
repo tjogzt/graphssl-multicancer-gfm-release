@@ -1,0 +1,31 @@
+# === OS-level ===
+._*
+.DS_Store
+Thumbs.db
+
+# === Python bytecode/cache ===
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# === LaTeX intermediate (never commit build artifacts) ===
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+
+# === Project binary artifacts (hosted on Zenodo/SWH/OSF separately) ===
+data/
+results/
+models/
+cloud_results/
+manuscript/*.pdf

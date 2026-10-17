@@ -1,0 +1,13 @@
+# GFM dependencies (reproducibility-pinned; verified environments:
+#   CUDA server: Python 3.11, torch 2.7.x, PyTorch Geometric 2.7.x
+#   Apple MPS:   Python 3.11, torch 2.13.0, PyTorch Geometric 2.8.0.post1
+#   Docker:      pytorch/pytorch:2.3.1-cuda12.1-cudnn8-runtime (see Dockerfile)
+python==3.11.*
+torch==2.13.0
+torch-geometric==2.8.0.post1
+numpy==2.4.6
+pandas==3.0.5
+scikit-learn==1.9.0
+scipy==1.17.1
+tqdm==4.70.0
+fair-esm==2.0.0

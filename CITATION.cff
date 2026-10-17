@@ -1,0 +1,82 @@
+cff-version: 1.2.0
+message: "If you use this software in your work, please cite our paper (Cell Reports Methods, Methods Track, 2026; Zenodo DOI below) and the archive DOI of this software package."
+title: "GraphSSL-MultiCancer-GFM: Graph Self-Supervised Pretraining on Multi-Cancer Molecular Networks — Task Design Principles and the Role of Protein Language Model Features"
+abstract: >
+  GraphSSL-MultiCancer-GFM (GFM for short) is a Cell Reports Methods (Methods Track)
+  open-source reproduction package. It benchmarks five controlled evaluation protocol for
+  graph self-supervised learning (Graph SSL) on 20 human cancers from TCGA,
+  integrating ESM-2 protein language model embeddings as node features,
+  with an FDA-level Schuirmann-1987 TOST equivalence test (Δ₀ = 0.002) for reproducibility.
+type: software
+repository-code: "https://github.com/tjogzt/graphssl-multicancer-gfm"
+repository-artifact: "https://doi.org/10.5281/zenodo.TBD1"
+identifiers:
+  - description: "Paper DOI (Cell Reports Methods) [TBD after acceptance]"
+    type: doi
+    value: "10.1016/j.crmeth.2026.TBD2"
+  - description: "Code + Scripts Zenodo archive DOI [TBD before upload]"
+    type: doi
+    value: "10.5281/zenodo.TBD1"
+  - description: "Training data, embeddings & checkpoints Zenodo archive DOI [TBD]"
+    type: doi
+    value: "10.5281/zenodo.TBD2"
+  - description: "OSF preregistration [TBD]"
+    type: doi
+    value: "10.17605/OSF.IO/XXXXX"
+authors:
+  - family-names: "Mo"
+    given-names: "Qingqing"
+    name: "Qingqing Mo"
+    affiliation: "Department of Obstetrics and Gynecology, National Clinical Research Center for Obstetrics and Gynecology; Key Laboratory of Cancer Invasion and Metastasis (Ministry of Education), Tongji Hospital, Tongji Medical College, Huazhong University of Science and Technology, Wuhan, China"
+    email: "qingqingmo520@tjh.tjmu.edu.cn"
+    orcid: "https://orcid.org/TBD-MO-ORCID-TBD"
+  - family-names: "Chen"
+    given-names: "Pingbo"
+    name: "Pingbo Chen"
+    affiliation: "Department of Obstetrics and Gynecology, National Clinical Research Center for Obstetrics and Gynecology; Key Laboratory of Cancer Invasion and Metastasis (Ministry of Education), Tongji Hospital, Tongji Medical College, Huazhong University of Science and Technology, Wuhan, China"
+    email: "supercpb520@163.com"
+    orcid: "https://orcid.org/TBD-CHEN-ORCID-TBD"
+  - family-names: "Xu"
+    given-names: "Cheng"
+    name: "Cheng Xu"
+    affiliation: "Department of Obstetrics and Gynecology, National Clinical Research Center for Obstetrics and Gynecology; Key Laboratory of Cancer Invasion and Metastasis (Ministry of Education), Tongji Hospital, Tongji Medical College, Huazhong University of Science and Technology, Wuhan, China"
+    email: "watt15629030676@tjh.tjmu.edu.cn"
+    orcid: "https://orcid.org/TBD-XU-ORCID-TBD"
+  - family-names: "Wang"
+    given-names: "Ya"
+    name: "Ya Wang"
+    affiliation: "Department of Obstetrics and Gynecology, National Clinical Research Center for Obstetrics and Gynecology; Key Laboratory of Cancer Invasion and Metastasis (Ministry of Education), Tongji Hospital, Tongji Medical College, Huazhong University of Science and Technology, Wuhan, China"
+    email: "misswangya@hotmail.com"
+    orcid: "https://orcid.org/TBD-WANG-ORCID-TBD"
+  - family-names: "Hu"
+    given-names: "Ting"
+    name: "Ting Hu"
+    affiliation: "Department of Obstetrics and Gynecology, National Clinical Research Center for Obstetrics and Gynecology; Key Laboratory of Cancer Invasion and Metastasis (Ministry of Education), Tongji Hospital, Tongji Medical College, Huazhong University of Science and Technology, Wuhan, China"
+    email: "huting_tj@163.com"
+    orcid: "https://orcid.org/TBD-HU-ORCID-TBD"
+  - family-names: "Sun"
+    given-names: "Qian"
+    name: "Qian Sun"
+    affiliation: "Department of Obstetrics and Gynecology, National Clinical Research Center for Obstetrics and Gynecology; Key Laboratory of Cancer Invasion and Metastasis (Ministry of Education), Tongji Hospital, Tongji Medical College, Huazhong University of Science and Technology, Wuhan, China"
+    email: "sunqian@tjh.tjmu.edu.cn"
+    orcid: "https://orcid.org/TBD-SUN-ORCID-TBD"
+  - family-names: "Zhu"
+    given-names: "Tao"
+    name: "Tao Zhu"
+    affiliation: "Department of Obstetrics and Gynecology, National Clinical Research Center for Obstetrics and Gynecology; Key Laboratory of Cancer Invasion and Metastasis (Ministry of Education), Tongji Hospital, Tongji Medical College, Huazhong University of Science and Technology, Wuhan, China"
+    email: "zhutao@tjh.tjmu.edu.cn"
+    orcid: "https://orcid.org/0009-0001-0779-2245"
+    corresponding: true
+date-released: 2026-09-29
+license: MIT
+keywords:
+  - "Graph Self-Supervised Learning"
+  - "Multi-Cancer Transcriptomics"
+  - "Protein Language Model"
+  - "ESM-2"
+  - "Cell Reports Methods"
+  - "TCGA"
+  - "METABRIC"
+  - "PPI Network"
+  - "Schuirmann TOST Equivalence"
+  - "Reproducibility Protocol"
