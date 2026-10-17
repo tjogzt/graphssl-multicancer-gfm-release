@@ -3,6 +3,9 @@
 Code and reproducible pipeline accompanying the manuscript submitted to
 ***Cell Reports Methods*** (Methods Track, IF ~14.3).
 
+> 🌐 **[中文 README · Chinese version](./README_zh-CN.md)** | 📖 This is the English document  
+> ☝️ 点击上方「中文 README」切换到中文版 / Click the link for the Chinese translation
+
 This repository ships five top-level entry-points for reviewers:
 
 1. **R-language wrapper** `R/RunMultiCancerSSL.R` — five high-level verbs (`build_graph / pretrain / evaluate_ppi / evaluate_patient / make_figures`) wrap the Python pipeline for R-language reviewers.
@@ -25,7 +28,8 @@ learning) — alone and in combination, across five equal-budget seeds
 ├── Makefile                      5 targets: data / preprocess / train /
 │                                  evaluate / figures
 ├── Dockerfile                    CUDA container (PyTorch + torch-geometric)
-├── README.md                     this file
+├── README.md                     this file (English; GitHub default view)
+├── README_zh-CN.md               Chinese version of this README
 ├── PIPELINE.md                   end-to-end execution guide (stage by stage)
 ├── requirements.txt              pinned Python environment
 ├── project.md                    project log (Chinese-only file allowed; see §Language)
@@ -197,8 +201,10 @@ python tests/test_figure_data.py
 - **Code, comments, printed output and figures:** English only. A CJK scan over
   `scripts/`, `tests/` and `R/` returns nothing.
 - **`project.md`:** Chinese — the project's single Chinese-language
-  source-of-truth log (Rule 13). It is the only CJK-bearing file in the release.
+  source-of-truth log (Rule 13).
 - **This `README.md`, `PIPELINE.md` and `docs/`:** English.
+- **`README_zh-CN.md`:** Chinese — the counterpart of this file. Together with
+  `project.md` it is the only CJK-bearing file in the release.
 
 ## Citation
 
