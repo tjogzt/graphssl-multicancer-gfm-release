@@ -2,9 +2,9 @@
 
 > **文档唯一权威记录 | Single Source of Truth**
 >
-> 文档版本: v2.0.2
+> 文档版本: v2.0.4
 > 创建日期: 2026-09-26
-> 最后更新: 2026-10-17
+> 最后更新: 2026-10-26
 > 项目负责人: Tao Zhu
 > 关键词: `graph-pretraining`, `HGT`, `cross-cancer`, `NAMR`, `CSP`, `C3L`, `ESM-2`, `TCGA`, `STRING-PPI`, `Cell Reports Methods`
 
@@ -273,9 +273,24 @@ Stage 7: Assembly & Figures      Stage 8: Benchmark & Audits
 | Fig. S3 | `figS3_skipdecoder_collapse_diagnostic` | Skip-decoder vs Plain-decoder 塌陷诊断 | `results/figS3_auc_provenance.json` |
 | Fig. S4 | `figS4_loss_curves_full_suite` | 全实验组损失曲线套件 | 各 checkpoint `loss_history` |
 | Fig. S5 | `figS5_setfingerprint_and_phantomedge_mechanism` | Set-fingerprint 与 phantom-edge 机制 | `results/control/` 机制诊断 JSON |
-| Graphical Abstract | `graphical_abstract_v1` | 图形摘要 | — |
+| Graphical Abstract | `graphical_abstract_v1` | 图形摘要（16:9 = 1152×648 pt，三层带结构） | `scripts/83_make_graphical_abstract.py`（自包含设计常量 + 渲染宽度自检） |
 
 数据溯源说明参见 `docs/FIGURE_REVIEW.md`；所有图表数据断言由 `tests/test_figure_data.py`（29 项检查）保障：**任何图数值改动必须同步更新制品并通过回归测试**。
+
+### 4.1 出图硬性红线 | Figure Redlines
+
+以下四条由 `scripts/86_check_figure_specs.py` 自动门禁（8 幅图逐图判定，任一不达标即 `EXIT=1`）：
+
+| 红线 | 判据 | 当前实测 |
+|---|---|---|
+| 字体 | 最终 PDF 仅允许 Arial 家族子集；禁止 Helvetica / DejaVu / Type 3 | 8/8 图仅 `ArialMT`、`Arial-BoldMT`、`Arial-ItalicMT` |
+| 字号 | 印刷后最小字号 ≥ 6.5 pt；matplotlib 设计字号取自 `TYPO_*` 常量 | 设计 7.0 pt → 印刷 6.7–7.0 pt |
+| 分辨率 | PNG 元数据必须为 300 dpi（±0.5）；印刷有效 dpi ≥ 300 | 8/8 图 PNG 元数据 299.9994；Fig. 2/3 印刷 316 dpi，其余 300 dpi |
+| 排版 | matplotlib 输出不得内嵌 `bbox_inches="tight"`；画布宽须等于 LaTeX `\includegraphics` 宽（scale = 1.0，supp 图为 `0.8\textwidth`） | 5/8 图 scale = 1.000；Fig. 1–3 因版式需要按 0.950/0.960 缩放 |
+
+**数值零硬编码**：图中任何被绘制的数值必须经 `figure_data.py` 从 `results/` 制品读取，禁止在出图脚本中重复字面量（`tests/test_figure_data.py` + 门禁 S6 共同把关）。
+
+✅ **已结清（v2.0.4）**：`graphical_abstract_v1.pdf` 原为 DejaVu Sans + `LastResortHE-Regular`（Type 3，含缺字回退字形 `⟂` U+27C2），违反上表字体红线。现已新建生成脚本 `scripts/83_make_graphical_abstract.py` 并重制：字体为纯 Arial 子集、零 Type 3、`⟂` 以 Arial 可用字符替代。详见 §6 v2.0.4。
 
 ---
 
@@ -312,6 +327,67 @@ Stage 7: Assembly & Figures      Stage 8: Benchmark & Audits
 ## 6. 变更记录 | Changelog
 
 > 标记格式: ▲ 新增 ▼ 删除 ■ 修改 ⚠ 注意
+
+### v2.0.4 — 2026-10-26（图形摘要重制：字体合规 + 九项版式缺陷修复 + 生成脚本入库）
+
+| 区域 | 变更 | 操作人 | 说明 |
+|---|---|---|---|
+| `release/scripts/83_make_graphical_abstract.py` | ▲ 新增 | 项目组 | 新建 GA 生成脚本（此前仓库无任何 GA 生成代码）。自包含：Arial rcParams + `pdf.fonttype=42` 字体块（复刻 `85_make_figures.py` 模块级约定）、权威调色板常量、16:9 页面几何常量、数值 provenance 注释（`4,998` / `3.89M` / `5 seeds` / `500 epochs` / `96-row` / `10-command` / `5 verbs` 均标注制品来源）、以及**渲染宽度自检**（逐 span 度量，越界即 `SystemExit`） |
+| `release/figures/graphical_abstract_v1.pdf`<br>`release/figures/graphical_abstract_v1.png` | ■ 修改 | 项目组 | 原图全文字以 **Type 3 `DejaVuSans` + `LastResortHE-Regular`** 嵌入（`⟂` U+27C2 在 Arial/DejaVu 中均缺字，被迫回退），违反 §4.1 字体红线。重制后：仅 `ArialMT` / `Arial-BoldMT` / `Arial-ItalicMT` 三个 CID TrueType 子集，**零 Type 3**；非 ASCII 字形仅保留 `· — ≠ ◦` 四种，均经 Arial 字形覆盖实测确认 |
+| `release/Makefile` | ■ 修改 | 项目组 | `figures` 目标接入 `83_make_graphical_abstract.py`（置于 `85` 之后、`86` 门禁之前）；表头 `make figures` 说明补入 graphical abstract。GA 不纳入 `86`：`86` 依赖 `manuscript/__main.tex` 的 `\includegraphics` 清单，而扁平发布树无 `manuscript/`，故 GA 由脚本内建自检把关 |
+| `release/project.md` | ■ 修改 | 项目组 | 版本升 v2.0.4；§4 图表清单补入 GA 生成脚本与画布规格；§4.1 原「已知未决项 ⚠」结清为「✅ 已结清」；新增本节 |
+
+**GA 版式缺陷修复（D1–D9，与重制前 raster/字体取证一一对应）**
+
+| 编号 | 缺陷（重制前实测证据） | 修复 | 复测结果 |
+|---|---|---|---|
+| D1 | METHOD 三列任务框内标签与说明叠印（最严重 22.03 pt 重叠） | 改为「主标签 1 行 + 灰色说明 1 行」两行式重排 | 37 span 自检 **0 overflow**；最紧 `task1-row1-desc` slack = +0.84 pt |
+| D2 | 另两处任务框叠印（71.83 / 48.51 pt） | 同上 | 同上 |
+| D3 | 中列主文本越出任务框右边线（x1 = 448.38 > 437.23，超 11.15 pt） | 两行式重排 + 逐列 `pick_size()` 二分缩字号 | 中列主文本字号 10.20 pt，slack ≥ +20.45 pt |
+| D4 | 第 3 行 baseline（382.34）落到任务框底（381.57）之下 | 任务框底由 381.57 下移至 **394.00** | 末行墨迹止于 y = 382，框底线 y = 393–394 → **9 pt 净空** |
+| D5 | Scope / Repro 框内表头与正文挤在一行（表头 489.12 vs 正文 487.65） | 表头独立成行（`CORNER_HEADER_BASE` 单独设定） | 表头与三行正文各自独立基线 |
+| D6 | 三枚 Level 圆圈底色不一致（2 × `#1A5A3A` + 1 × `#1F8A4C`） | 统一为 `#1F8A4C` | 连通域检出 3 枚圆标，均为 12.72 × 12.72 pt、填充 `#1F8A4C` |
+| D7 | 三层带标题贴带顶边 | 带标题下移（`BAND_TITLE_OFFSET = 15.5`） | 标题与带顶边净空 |
+| D8 | METHOD 带标题与节点菱形右缘相撞（菱形右缘 284.62） | `METHOD_TITLE_X` 左移起点至 **293.60**；带框描边 `zorder = 3.0` 高于节点框 `2.0` | METHOD 标题 x0 = 293.60 > 284.62 |
+| D9 | FINDINGS 带标题落入 guideline card1 框内 | 标题上提 + 三卡片整体下移（`CARD_SHIFT = 14.0`） | 标题墨迹 y 413–423，card1 顶边 y 430.5 → **6.8 pt 净空** |
+
+**验证证据（v2.0.4）**
+
+| 检查项 | 命令 | 结果 |
+|---|---|---|
+| 排版自检 | `python scripts/83_make_graphical_abstract.py` | `37 text spans checked, 0 overflow(s)` |
+| 字体合规 | `pdffonts figures/graphical_abstract_v1.pdf` | 3 行：`Arial-BoldMT` / `Arial-ItalicMT` / `ArialMT`，全部 `CID TrueType`、`emb=yes`；**Type 3 = 0** |
+| 缺字回退 | `pdftotext … \| 非 ASCII 字符统计` | 仅 `·` (U+00B7)、`—` (U+2014)、`≠` (U+2260)、`◦` (U+25E6)；无 `⟂` / `LastResort` 残留 |
+| 页面尺寸 | `pdfinfo figures/graphical_abstract_v1.pdf` | `Page size: 1152 x 648 pts`（16:9） |
+| PNG 分辨率 | PIL `Image.open(...).info["dpi"]` | `(4800, 2700)` px，元数据 **299.9994** dpi |
+| 忠实复刻（形状清单） | `fitz.get_drawings()` 原件 vs 新件，`area ≥ 300` 逻辑形状 | 几何逐项一致（三层带 `[152.93, 78.31, 1027.87, 224.12]` 等）；fill / stroke 调色板完全一致；原件 23 个逻辑形状 → 新件 26 个（三层带 fill 与 stroke 拆为两个对象，+3） |
+| 忠实复刻（文字清单） | 原件 span dump vs 新件 `pdftotext` | 69 个 span 文本逐条保留（`(-> ` 与 `<>` 为原件既有 ASCII 写法，未作改动） |
+| 视觉边框 | 全页墨迹 bbox | x `[125.28, 1028.88]`、y `[77.28, 571.44]` pt；`x = 125.28` 为 TCGA 菱形左顶点，**属原件既有设计**（原件同坐标 `x[126.14, 223.24]`），非新增越界 |
+| 流水线接入 | `make -n figures` | 顺序 `84 → 85 → 83 → 86`，命令展开正确 |
+
+⚠ **注意（有意保留的差异）**：GA 中 `graphical_abstract_v1` 的数值（`4,998` 边 / `3.89M` 参数 / `5 seeds` / `500 epochs` 等）以**注释标注 provenance** 的方式写在 `83_make_graphical_abstract.py` 内，未走 `figure_data.py`。原因是扁平发布树不含 `results/` 制品目录，GA 又是对外唯一入口不能因缺制品而无法重生成；这与 §4.1「数值零硬编码」契约的偏差**已在此显式披露**，待 PI 裁定是否要求 GA 也改走制品读取。
+
+### v2.0.3 — 2026-10-26（出图规格合规整改：Fig. 1 双版本对齐 + 字号泄漏清理 + 门禁修复）
+
+| 区域 | 变更 | 操作人 | 说明 |
+|---|---|---|---|
+| `release/scripts/85_make_figures.py` | ■ 修改 | 项目组 | ▼ 删除 13 处写在 `set_title`/`set_xlabel`/`set_ylabel` 字符串字面量内的 `fontsize=N`——字面量会随图进入 PDF 文本层，污染图形文字并绕过 rcParams 字号契约；■ 2 处硬编码改为数据/常量来源（画布高 `2.95` → `FIG2_FIGSIZE`；skip-decoder AUC `0.601` → `figure_data.load_skip_decoder_auc()`）；■ 2 个名实不符的常量 `S3_SUPTITLE_FONTSIZE_A/B`（名为字号、实为标题文本）→ `S3_TITLE_A/B` |
+| `release/scripts/figure_data.py` | ▲ 新增 | 项目组 | 新增 `load_skip_decoder_auc()` 与 `AUC_PROVENANCE_SKIP_PREFIX`，使 Fig. 2(b) 与 Fig. S3(b) 从同一制品 `results/figS3_auc_provenance.json` 读取同一训练运行的 AUC，避免两处各自复述数值 |
+| `release/scripts/86_check_figure_specs.py` | ■ 修改 | 项目组 | ■ 修复 `designed_font_sizes()` 正则（原按 rcParams 字符串匹配，而实际字号定义为 `TYPO_*` 符号常量 → 触发 `AttributeError` 使门禁完全不可用）；▲ 新增 `FIGURE_SPECS` 单一清单（manuscript 提交名 → `85_make_figures.py` 中 builder 函数名），取代原先用旧图名的 `order` 列表；■ Fig. 1 位图的画布宽改按矢量 PDF 页盒设计宽（502 pt = 6.9722 in）度量，不再被 600-dpi 放大栅格的像素宽误判 `scale`；■ 位图 PASS 标签由无条件覆盖改为 `is_bitmap and not bad`，真实失败（如 dpi 越界）不再被掩盖 |
+| `figures/fig1_architecture.png`<br>`manuscript/fig1_architecture.png` | ■ 修改 | 项目组 | 原 PNG（5977×2299 @ 600 dpi）经 md5 比对与 `archive/root_cleanup_20261016/.../fig1_architecture_BEFORE_8PT_FLOOR_RAISE_V101.png` 完全一致，即 **V101 之前的陈旧栅格**：内含烘焙图注（"Fig. 1 \| Graph Foundation Model (GFM) architecture…"）、术语与当前矢量 PDF 不一致、宽高比 2.5998 亦与 PDF 页盒（502×217 pt，2.3116）不符。改由权威矢量 `fig1_architecture.pdf` 以精确 300 dpi 重新栅格化 → 2092×905 px、元数据 299.9994 dpi、声明宽 6.9733 in，与 PDF 同版同比例 |
+
+**验证证据（v2.0.3）**
+
+| 检查项 | 命令 | 结果 |
+|---|---|---|
+| 门禁总判定 | `GFM_PROJECT_ROOT=<repo> python scripts/86_check_figure_specs.py` | **0 figure(s) failing，EXIT=0**（8/8 图 PASS；整改前为 `1 figure(s) failing`，EXIT=1） |
+| 图形文字污染 | `for f in figures/*.pdf; do pdftotext "$f" - \| grep -c "fontsize="; done` | 8/8 图为 **0**（整改前 Fig. 2 等含泄漏） |
+| 字体合规 | `pdffonts figures/*.pdf` | 8/8 图仅 `ArialMT` / `Arial-BoldMT` / `Arial-ItalicMT` 子集；DejaVu 与 Type 3 均为 0 |
+| PNG 分辨率元数据 | PIL `Image.info["dpi"]` 逐图 | 8/8 图 **299.9994**，门禁容差 ±0.5 内 |
+| Fig. 1 双版本一致性 | `pdfinfo` vs PIL | PNG 2092×905 @300 dpi（6.9733 in，比例 2.3116）与 PDF 页盒 502×217 pt 同比例；栅格无边缘裁切（墨迹 bbox 内缩 ≥ 27 px） |
+| Fig. 1 旧件留痕 | `md5 manuscript/fig1_architecture.png` | 旧件 `1ca77c11…` 已备份至 `/tmp/gfm_backup_fig1/`，可在 `archive/root_cleanup_20261016/` 内溯源 |
+
+⚠ **同批新增未决项（未经 PI 确认，暂不执行）**：`figures/graphical_abstract_v1.pdf` 字体为 DejaVu Sans + `LastResortHE-Regular`（Type 3，含缺字回退字形 `⟂` U+27C2），违反 §4.1 字体红线；且仓库内查无其生成脚本（`grep -rIl "graphical_abstract"` 仅命中 `project.md` / `README*` / 归档日志），需 PI 决定是否授权新建生成脚本并重制。
 
 ### v2.0.2 — 2026-10-17（双语 README 与发布仓库独立化）
 

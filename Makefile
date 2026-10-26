@@ -9,7 +9,7 @@
 #   make preprocess  # (2) ESM-2 embeddings + build every graph variant.
 #   make train       # (3) 5 seeds × 500-epoch HGT pretraining (5 ablation arms).
 #   make evaluate    # (4) Downstream evaluation: PPI AUC, cluster, pathway, METABRIC, PAAD, GDSC2.
-#   make figures     # (5) Generate all manuscript figures: PDF + 300-dpi PNG.
+#   make figures     # (5) Generate all figures incl. graphical abstract: PDF + 300-dpi PNG.
 # ----------------------------------------------------------------
 SHELL := /bin/bash
 export GFM_PROJECT_ROOT := $(CURDIR)
@@ -61,4 +61,5 @@ figures:
 	@echo "[Makefile::figures] Regenerate every figure (PDF + PNG @300 dpi)."
 	$(PY) $(SCRIPTDIR)/84_extract_fig1_layout.py
 	$(PY) $(SCRIPTDIR)/85_make_figures.py
+	$(PY) $(SCRIPTDIR)/83_make_graphical_abstract.py --fig-dir $(CURDIR)/figures
 	$(PY) $(SCRIPTDIR)/86_check_figure_specs.py
