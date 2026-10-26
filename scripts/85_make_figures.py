@@ -158,7 +158,7 @@ SUPP_WIDTH_RATIO = 0.8
 SUPP_WIDTH_IN = SUPP_WIDTH_RATIO * TEXTWIDTH_IN
 
 # --- Fig. 2 / Fig. 3 (Main Text) ---
-FIG2_FIGSIZE = (MAIN_WIDTH_IN, 2.30)
+FIG2_FIGSIZE = (MAIN_WIDTH_IN, 2.95)
 FIG3_FIGSIZE = (MAIN_WIDTH_IN, 2.45)
 FIG2_SUPTITLE_FONTSIZE = 10
 FIG3_SUPTITLE_FONTSIZE = 10
@@ -339,8 +339,8 @@ S3_BAR_WIDTH = 0.62
 S3_BAR_VALUE_OFFSET_Y = 0.008
 S3_BAR_VALUE_FONTSIZE = 8.0
 S3_TICK_LABEL_FONTSIZE = 8.0
-S3_SUPTITLE_FONTSIZE_A = "(a) Reconstruction loss"
-S3_SUPTITLE_FONTSIZE_B = "(b) Representation quality"
+S3_TITLE_A = "(a) Reconstruction loss"
+S3_TITLE_B = "(b) Representation quality"
 S3_REPLACE_WS_PATTERN = r"\s*\n\s*"
 S3_REPLACE_SEED_PATTERN = "(seed "
 S3_REPLACE_SEED_REPLACEMENT = "(s"
@@ -688,7 +688,7 @@ def make_fig2(out_dir, ckpt=None):
     ckpt = os.path.join(config.RESULT_DIR, FULL_CKPT) if ckpt is None else ckpt
     history = fd.load_loss_history(ckpt if os.path.isabs(ckpt) else config.resolve(ckpt))
     epochs = np.arange(1, len(history["total"]) + 1)
-    fig, axes = plt.subplots(1, 2, figsize=(MAIN_WIDTH_IN, 2.95))
+    fig, axes = plt.subplots(1, 2, figsize=FIG2_FIGSIZE)
     ax = axes[0]
     ax.plot(epochs, history["namr"], color=fs.COL_OK, label="NAMR (full model)")
     ax.plot(epochs, history["csp"], color=fs.COL_ALT, label="CSP")
@@ -699,7 +699,7 @@ def make_fig2(out_dir, ckpt=None):
                    label=r"$\ln N_{cancer}$ (C3L uniform-prototype level)")
     ax.axhline(1.065, ls="--", color=fs.COL_REF, lw=FIG2_REF_LINE_LW,
                label="constant-mean reference (standardized NAMR target)")
-    ax.set_title("(a, fontsize=10) Objective losses during training", fontsize=FIG2_SUPTITLE_FONTSIZE)
+    ax.set_title("(a) Objective losses during training", fontsize=FIG2_SUPTITLE_FONTSIZE)
     ax.set_xlabel("Epoch", fontsize=9)
     ax.set_ylabel("Loss", fontsize=9)
     axes[0].spines["left"].set_visible(False)
@@ -719,7 +719,7 @@ def make_fig2(out_dir, ckpt=None):
         ("CSP+NAMR", "csp_namr_legacy_s42.pt", fs.COL_EXTRA, rows["csp_namr"]["auc"]),
         ("Full", "full.pt", fs.COL_ALT, rows["full"]["auc"]),
         ("CSP-only", "csp_only.pt", fs.COL_MAIN, rows["csp_only"]["auc"]),
-        ("skip-decoder NAMR", "namr_only_s7.pt", fs.COL_REF, 0.601),
+        ("skip-decoder NAMR", "namr_only_s7.pt", fs.COL_REF, fd.load_skip_decoder_auc()),
     ]
     ax = axes[1]
     for label, fname, colour, auc in arms:
@@ -754,9 +754,9 @@ def make_fig2(out_dir, ckpt=None):
             color=fs.COL_GENE, ha="left", va="top"
         )
     ax.set_xscale("log")
-    ax.set_xlabel("Final reconstruction (NAMR, fontsize=9) loss, log scale")
+    ax.set_xlabel("Final reconstruction (NAMR) loss, log scale")
     ax.set_ylabel("Known-edge recovery AUC", fontsize=9)
-    ax.set_title("(b, fontsize=10) Lower loss does not order the endpoint", fontsize=FIG2_SUPTITLE_FONTSIZE)
+    ax.set_title("(b) Lower loss does not order the endpoint", fontsize=FIG2_SUPTITLE_FONTSIZE)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     for a in axes:
@@ -783,7 +783,7 @@ def make_fig_s_total_loss(out_dir, ckpt=None):
     ax.plot(epochs, history["total"], color=fs.COL_MAIN)
     ax.set_xlabel("Epoch", fontsize=9)
     ax.set_ylabel("Total loss", fontsize=9)
-    ax.set_title("Total training loss of the full model (all three objectives, fontsize=10)")
+    ax.set_title("Total training loss of the full model (all three objectives)")
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     fig.tight_layout()
@@ -899,7 +899,7 @@ def make_fig3(out_dir):
     # Lowest arm (CSP-only, mean - SD = 0.505) would sit on the axis at ylim=0.5,
     # so the axis starts below chance and the chance line stays visible.
     ax.set_ylim(FIG3_YLIM_LOW, FIG3_YLIM_HIGH)
-    ax.set_title("Known-edge recovery by training seed (mean $\\pm$ SD, fontsize=10)")
+    ax.set_title("Known-edge recovery by training seed (mean $\\pm$ SD)")
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     fig.tight_layout()
@@ -931,7 +931,7 @@ def make_fig_s1(out_dir, base_ref=None, h1_std=None):
             label="no standardization, 100 epochs (predict-mean level \u22481.32)")
     ax.plot(np.arange(1, len(standardized["namr"]) + 1), standardized["namr"],
             color=fs.COL_MAIN, label="standardized features")
-    ax.set_xlabel("Epoch (100-epoch NAMR-only sweep, fontsize=9)")
+    ax.set_xlabel("Epoch (100-epoch NAMR-only sweep)")
     ax.set_ylabel("NAMR loss", fontsize=9)
     ax.legend(frameon=False, fontsize=9)
     ax.spines["top"].set_visible(False)
@@ -972,7 +972,7 @@ def make_fig_s2(out_dir):
     ax.set_xscale("log", base=2)
     ax.set_xticks(payload["K"])
     ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
-    ax.set_xlabel("Training patients per cancer type (K; log2, fontsize=9)")
+    ax.set_xlabel("Training patients per cancer type (K; log2)")
     ax.set_ylabel("Few-shot accuracy", fontsize=9)
     ax.set_ylim(S2_YLIM_LOW, S2_YLIM_HIGH)
     ax.set_xlim(S2_XLIM_LOW, S2_XLIM_HIGH)
@@ -1020,7 +1020,7 @@ def make_fig_s3(out_dir, plain_ckpt=None, skip_ckpt=None):
     axes[0].set_xlim(S3_XLIM_LOW, S3_XLIM_HIGH)
     axes[0].set_ylim(S3_YLIM_LOSS_LOW, S3_YLIM_LOSS_HIGH)
     axes[0].legend(frameon=False, fontsize=9)
-    axes[0].set_title(S3_SUPTITLE_FONTSIZE_A, fontsize=10)
+    axes[0].set_title(S3_TITLE_A, fontsize=10)
     # Single-line tick labels (review 2026-09-17, R5): the two-line
     # "plain NAMR\n(seed 42)" form produced adjacent labels only ~4 px apart at
     # 300 dpi. The run/seed identity is stated in the caption instead.
@@ -1039,12 +1039,12 @@ def make_fig_s3(out_dir, plain_ckpt=None, skip_ckpt=None):
                     label="Chance (0.5)")
     axes[1].set_xticks(positions)
     axes[1].set_xticklabels(tick_labels, fontsize=S3_TICK_LABEL_FONTSIZE)
-    axes[1].set_ylabel("known-edge recovery AUC (0.5\u20131.0, fontsize=9)")
+    axes[1].set_ylabel("known-edge recovery AUC (0.5\u20131.0)")
     axes[1].set_ylim(S3_AUC_YLIM_LOW, S3_AUC_YLIM_HIGH)
     for index, value in enumerate(values):
         axes[1].text(index, value + S3_BAR_VALUE_OFFSET_Y,
                      f"{value:.3f}", ha="center", fontsize=S3_BAR_VALUE_FONTSIZE)
-    axes[1].set_title(S3_SUPTITLE_FONTSIZE_B, fontsize=10)
+    axes[1].set_title(S3_TITLE_B, fontsize=10)
     fig.tight_layout()
     fs.save_fig(fig, os.path.join(out_dir, "figS_skip_diagnostic"))
 
@@ -1079,9 +1079,9 @@ def make_fig_s_mechanism(out_dir):
                     label=f"{label} (seed {seed})"
                     if seed == sorted(geo["per_seed"][arm])[0] else None)
     ax.set_yscale("log")
-    ax.set_xlabel("Singular-value index (top 20, fontsize=9)")
+    ax.set_xlabel("Singular-value index (top 20)")
     ax.set_ylabel("Share of $\\sum s_i$", fontsize=9)
-    ax.set_title("(a, fontsize=10) Spectrum: CSP collapse, all seeds", fontsize=S_MECH_TITLE_FONTSIZE)
+    ax.set_title("(a) Spectrum: CSP collapse, all seeds", fontsize=S_MECH_TITLE_FONTSIZE)
     ax.legend(fontsize=S_MECH_ARM_LABEL_FONTSIZE, frameon=False, loc="upper right")
 
     ax = axes[1]
@@ -1092,9 +1092,9 @@ def make_fig_s_mechanism(out_dir):
             color=fs.COL_ALT, lw=S_MECH_LINE_LW)
     ax.set_yscale("log")
     ax.set_xticks(layers)
-    ax.set_xlabel("HGT layer (0 = one-hot input, fontsize=9)")
-    ax.set_ylabel("Min. pairwise distance (cancer nodes, fontsize=9)")
-    ax.set_title("(b, fontsize=10) Prototype distance with depth", fontsize=S_MECH_TITLE_FONTSIZE)
+    ax.set_xlabel("HGT layer (0 = one-hot input)")
+    ax.set_ylabel("Min. pairwise distance (cancer nodes)")
+    ax.set_title("(b) Prototype distance with depth", fontsize=S_MECH_TITLE_FONTSIZE)
 
     for a in axes:
         a.spines["top"].set_visible(False)

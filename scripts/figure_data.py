@@ -57,6 +57,12 @@ ARTIFACT_LOSS_SUMMARY = os.path.join("ablation_real", "loss_summary.json")
 ARTIFACT_AUC_PROVENANCE = "figS3_auc_provenance.json"
 ARTIFACT_PATIENT_ACC = "patient_fewshot_acc.json"
 
+# Bar-name prefix identifying the skip-connected NAMR diagnostic inside the
+# AUC-provenance artifact. Its bar name is "skip NAMR\n(seed 7)"; matching on
+# the prefix keeps Fig. 2(b) and Fig. S3(b) reading the same run without
+# either script restating the value.
+AUC_PROVENANCE_SKIP_PREFIX = "skip"
+
 # Pre-computed graph layout for the heterogeneous-network schematic.
 ARTIFACT_FIG1_LAYOUT = "fig1_subgraph_layout.json"
 
@@ -230,6 +236,27 @@ def load_auc_provenance(path=None):
     """
     with open(path or _default(ARTIFACT_AUC_PROVENANCE)) as handle:
         return json.load(handle)
+
+
+def load_skip_decoder_auc(path=None):
+    """
+    @brief   Known-edge recovery AUC of the skip-connected NAMR diagnostic
+             (seed 7). Fig. 2(b) and Fig. S3(b) describe the same training run,
+             so both read the value from one artifact instead of restating it.
+    @param   path   Optional absolute path override. Default: RESULT_DIR /
+                    ARTIFACT_AUC_PROVENANCE.
+    @return  Float AUC of the bar whose name starts with
+             AUC_PROVENANCE_SKIP_PREFIX.
+    @note    Raises KeyError if the artifact holds no such bar — that means the
+             provenance file predates the skip-decoder diagnostic run.
+    """
+    bars = load_auc_provenance(path)["bars"]
+    for name, value in bars.items():
+        # Bar names are display strings with embedded newlines ("skip NAMR\n(seed 7)").
+        flat = name.replace("\n", " ").strip().lower()
+        if flat.startswith(AUC_PROVENANCE_SKIP_PREFIX):
+            return float(value)
+    raise KeyError(f"no skip-decoder bar found in {ARTIFACT_AUC_PROVENANCE}")
 
 
 def load_patient_acc(path=None):

@@ -57,10 +57,15 @@ MIN_EFFECTIVE_DPI = 300.0
 EPS_SCALE = 0.002
 EPS_DPI = 1.0
 
-# Fig. 1 is the author-approved bitmap infographic (not a matplotlib output);
-# its type size is measured from the artwork itself, so designed-pt bookkeeping
-# (S3) and the edge-ink probe (S5) do not apply.
-BITMAP_FIGURES = {"fig1_architecture"}
+# Fig. 1 is author artwork rather than a matplotlib output, so the designed-pt
+# bookkeeping (S3) and the edge-ink probe (S5) do not apply; its released PNG is
+# a 300-dpi raster of the authoritative vector PDF. The value below is the
+# artwork's DESIGN width in inches — the PDF page box that LaTeX includes
+# (502 pt = 6.9722 in) — which is the reference the include scale is measured
+# against. It also pins the reference independently of the PNG's own px/dpi
+# metadata, so a raster that drifts away from the PDF page box is caught rather
+# than silently redefining its own canvas.
+BITMAP_FIGURES = {"fig1_architecture": 6.9722}
 BITMAP_BODY_PT = 13.9
 
 # Output PNG DPI expectation used by S4.
@@ -97,6 +102,24 @@ SHIPPED_BUILDERS = (
 )
 BAD_HEX_DISPLAY_LIMIT = 12         # Truncate long non-palette occurrence lists.
 SCORE_DECIMALS = 4
+
+# Shipped figure inventory: manuscript stem -> builder function in 85_make_figures.py.
+# 85_make_figures.py writes each figure under its builder stem; the manuscript
+# folder carries the submission-facing renamed stem (see
+# manuscript/attachments/figures_dpi_and_rename_commands.sh). The gate therefore
+# reads the PNG and the LaTeX include from the manuscript stem while reading the
+# designed point size from the builder function, so a stale or missing rename
+# shows up as "no \includegraphics" instead of silently passing.
+FIGURE_SPECS = (
+    ("fig1_architecture", "make_fig1"),
+    ("fig2_convergence_v2", "make_fig2"),
+    ("fig3_ablation_v2", "make_fig3"),
+    ("figS1_namr_reconstruction_fix", "make_fig_s1"),
+    ("figS2_patient_setfingerprint_tradeoff", "make_fig_s2"),
+    ("figS3_skipdecoder_collapse_diagnostic", "make_fig_s3"),
+    ("figS4_loss_curves_full_suite", "make_fig_s_total_loss"),
+    ("figS5_setfingerprint_and_phantomedge_mechanism", "make_fig_s_mechanism"),
+)
 
 
 def include_widths():
@@ -159,9 +182,13 @@ def designed_font_sizes(builder):
     explicit = [float(v) for v in re.findall(r"fontsize=([\d.]+)", body)]
     with open(FIGSTYLE) as handle:
         style = handle.read()
-    label = float(re.search(r'"axes\.labelsize": ([\d.]+)', style).group(1))
-    tick = float(re.search(r'"xtick\.labelsize": ([\d.]+)', style).group(1))
-    legend = float(re.search(r'"legend\.fontsize": ([\d.]+)', style).group(1))
+    # figure_style.py declares its typography as named constants and feeds them
+    # into rcParams inside apply_style(), so the point sizes are read from the
+    # constant definitions rather than from rcParams string literals. The
+    # trailing comment on each line is ignored by the numeric capture group.
+    label = float(re.search(r"^TYPO_LABEL_SIZE\s*=\s*([\d.]+)", style, re.M).group(1))
+    tick = float(re.search(r"^TYPO_TICK_LABEL_SIZE\s*=\s*([\d.]+)", style, re.M).group(1))
+    legend = float(re.search(r"^TYPO_LEGEND_SIZE\s*=\s*([\d.]+)", style, re.M).group(1))
     smallest = (
         min([tick, legend] + explicit)
         if explicit else min(tick, legend)
@@ -357,21 +384,8 @@ def main():
     @return  int – 0 if all checks pass, 1 otherwise.
     """
     includes = include_widths()
-    order = [
-        "fig1_architecture", "fig2_convergence_v2", "fig3_ablation_v2",
-        "figS_namr_fix", "figS_patient_learning", "figS_skip_diagnostic",
-        "figS_total_loss", "figS_mechanism",
-    ]
-    builders = {
-        "fig1_architecture": "make_fig1",
-        "fig2_convergence_v2": "make_fig2",
-        "fig3_ablation_v2": "make_fig3",
-        "figS_namr_fix": "make_fig_s1",
-        "figS_patient_learning": "make_fig_s2",
-        "figS_skip_diagnostic": "make_fig_s3",
-        "figS_total_loss": "make_fig_s_total_loss",
-        "figS_mechanism": "make_fig_s_mechanism",
-    }
+    order = [stem for stem, _ in FIGURE_SPECS]
+    builders = dict(FIGURE_SPECS)
     palette, bad_hex, ref_hex, dup_hex = check_palette()
     failures = []
 
@@ -385,9 +399,12 @@ def main():
         if info is None:
             continue
         inc, src = includes.get(stem, (float("nan"), "MISSING"))
-        scale = inc / info["width_in"]
-        eff_dpi = info["px"] / inc
         is_bitmap = stem in BITMAP_FIGURES
+        # Bitmap infographics carry their own design width; matplotlib figures
+        # are measured against the canvas width of the exported PNG.
+        canvas_in = BITMAP_FIGURES.get(stem) or info["width_in"]
+        scale = inc / canvas_in
+        eff_dpi = info["px"] / inc
         fonts = designed_font_sizes(builders[stem])
         if is_bitmap:
             min_pt = BITMAP_BODY_PT
@@ -424,11 +441,14 @@ def main():
             if over_fill is None
             else (f"{over_fill} cl/{over_rows} rw" if over_fill else "none")
         )
-        if is_bitmap:
+        if is_bitmap and not bad:
+            # The bitmap exception only waives the designed-pt and edge-ink
+            # probes (S3/S5); a real failure such as off-spec PNG dpi metadata
+            # (S4) must still surface instead of being masked by this label.
             verdict = "PASS (bitmap infographic: documented type-size exception)"
 
         print(
-            f"{stem:<26}{info['width_in']:>7.2f}\"{inc:>8.2f}\"{scale:>7.3f}"
+            f"{stem:<26}{canvas_in:>7.2f}\"{inc:>8.2f}\"{scale:>7.3f}"
             f"{eff_dpi:>9.0f}{min_pt:>8.1f}{printed:>9.1f}{gap_txt:>10}  {verdict}"
         )
         print(f"{'':<26}include {src}")

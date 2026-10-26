@@ -29,3 +29,4 @@ results/
 models/
 cloud_results/
 manuscript/*.pdf
+.codegraph/
